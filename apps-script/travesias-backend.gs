@@ -68,11 +68,12 @@ var MAX_BYTES_TOTAL   = 20 * 1024 * 1024 * 1024;   // 20 GB por propuesta
 var EXT_FOTO  = ['.jpg', '.jpeg', '.png'];
 var EXT_VIDEO = ['.mp4', '.mov'];
 
-/* Correo de confirmación al participante. Arranca APAGADO para que la
-   primera autorización no tenga que pedir permisos de Gmail. Cuando
-   quieras encenderlo: ponlo en true y vuelve a implementar — Google
-   pedirá autorizar el permiso nuevo. */
-var ENVIAR_CONFIRMACION = false;
+/* Correo de confirmación al participante, enviado desde la cuenta que
+   corre el script. Al estar encendido, Apps Script pide un permiso más
+   (enviar correo en tu nombre): la próxima vez que ejecutes
+   `probarPermisos` habrá que autorizarlo de nuevo.
+   Cuota diaria de Workspace: 1500 destinatarios, de sobra aquí. */
+var ENVIAR_CONFIRMACION = true;
 var RESPONDER_A = 'equipo@estudiolaselva.com';
 
 /* ===============================================================
@@ -267,17 +268,24 @@ function cerrar(p) {
   if (ENVIAR_CONFIRMACION) {
     try {
       var v = fila.hoja.getRange(fila.n, 1, 1, 13).getValues()[0];
+      var lista = [v[8], v[9]].filter(String).join('\n').split('\n').filter(String);
       MailApp.sendEmail({
         to: v[4],
         replyTo: RESPONDER_A,
-        subject: 'Travesías — propuesta recibida (' + v[0] + ')',
+        name: 'Travesías',
+        subject: 'Travesías — recibimos tu propuesta (' + v[0] + ')',
         body: 'Hola ' + v[2] + ',\n\n' +
-              'Recibimos tu propuesta "' + v[6] + '".\n' +
-              'Tu número de radicado es ' + v[0] + '; guárdalo para cualquier consulta.\n\n' +
-              'Archivos recibidos:\n' +
-              [v[8], v[9]].filter(String).join('\n') + '\n\n' +
-              'Te escribiremos con los resultados.\n\n' +
-              'Travesías — Universidad de los Andes × Estudio La Selva'
+              'Recibimos tu propuesta "' + v[6] + '". Queda registrada con el\n' +
+              'número de radicado ' + v[0] + ' — guárdalo, es tu comprobante de\n' +
+              'entrega y el que usaremos para cualquier consulta.\n\n' +
+              'Archivos recibidos (' + lista.length + '):\n' +
+              lista.map(function (x) { return '  · ' + x; }).join('\n') + '\n\n' +
+              'Si algo de esto no coincide con lo que enviaste, respóndenos a\n' +
+              'este correo citando tu radicado.\n\n' +
+              'Te escribiremos cuando haya resultados.\n\n' +
+              '—\n' +
+              'Travesías\n' +
+              'Universidad de los Andes · Antropología × Estudio La Selva'
       });
     } catch (err) {
       console.error('no se pudo enviar la confirmación: ' + err);
