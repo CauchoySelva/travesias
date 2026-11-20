@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0D0804">
+<meta name="description" content="Travesías — convocatoria de fotografía y video. Universidad de los Andes y Estudio La Selva.">
+<title>Travesías — Convocatoria</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D0804; --bg-2:#15100A; --panel:#1C120A;
+    --line:#4A3528; --line-soft:#33241A;
+    --cream:#E8DCC8; --muted:#B8A890; --faint:#8A7A64;
+    --terra:#C17A4A; --terra-hi:#D4945E;
+    --dorado:#D4A843; --dorado-hi:#E5C05C;
+    --display:'Cormorant Garamond', serif;
+    --body:'Crimson Text', serif;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    background:radial-gradient(ellipse 90% 90% at 50% 40%, var(--bg-2) 0%, var(--bg) 72%);
+    color:var(--cream); font-family:var(--body); font-size:17px; line-height:1.55;
+    -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  }
+  button{ font-family:inherit; cursor:pointer; background:none; border:none; color:inherit; }
+  button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible{
+    outline:2px solid var(--dorado); outline-offset:3px; }
+  *{ scrollbar-width:thin; scrollbar-color:var(--line) var(--bg); }
+  ::-webkit-scrollbar{ width:10px; }
+  ::-webkit-scrollbar-track{ background:var(--bg); }
+  ::-webkit-scrollbar-thumb{ background:var(--line); border-radius:6px; border:2px solid var(--bg); }
+
+  /* ---------- Tucu + atmósfera (del archivo) ---------- */
+  #tucuCv{ position:fixed; inset:0; z-index:1; width:100%; height:100%; display:block; pointer-events:none; }
+  .stage-msg{ position:fixed; left:0; right:0; top:58%; z-index:10; text-align:center;
+    font-size:11.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--faint);
+    pointer-events:none; transition:opacity .6s ease; }
+  .stage-msg.gone{ opacity:0; }
+  .velo{ position:fixed; inset:0; z-index:2; pointer-events:none; }
+  .velo.abajo{ background:linear-gradient(to top, rgba(13,8,4,.96) 0%, rgba(13,8,4,.84) 22%, rgba(13,8,4,.38) 44%, transparent 66%); }
+  .velo.arriba{ background:
+      radial-gradient(ellipse 60% 55% at 12% 6%, rgba(13,8,4,.85), transparent 70%),
+      linear-gradient(to bottom, rgba(13,8,4,.55) 0%, transparent 22%); }
+  .fogv{ position:fixed; z-index:19; pointer-events:none; width:140vw; height:90vh; left:-20vw; opacity:.5; mix-blend-mode:screen; will-change:transform; }
+  .fogv.a{ top:8vh;  background:radial-gradient(ellipse 46% 38% at 32% 50%, rgba(150,98,52,.10), transparent 70%); animation:fogA 75s ease-in-out infinite alternate; }
+  .fogv.b{ top:42vh; background:radial-gradient(ellipse 42% 34% at 68% 50%, rgba(110,84,46,.09), transparent 70%); animation:fogB 95s ease-in-out infinite alternate; }
+  @keyframes fogA{ from{transform:translateX(-6vw)} to{transform:translateX(9vw)} }
+  @keyframes fogB{ from{transform:translateX(7vw)}  to{transform:translateX(-8vw)} }
+  #embers{ position:fixed; inset:0; z-index:20; pointer-events:none; }
+  #petro{ position:fixed; inset:0; z-index:21; pointer-events:none; opacity:0;
+    background-image:url('https://images.squarespace-cdn.com/content/67a29672e45a656b8be53344/51a4102d-9cbe-486f-bf6a-0589e4f46855/Petroglifos2.png?content-type=image%2Fpng');
+    background-size:720px; background-repeat:repeat;
+    filter:sepia(1) saturate(3.4) hue-rotate(-28deg) brightness(1.05); mix-blend-mode:screen; }
+  .grain{ position:fixed; inset:0; z-index:60; pointer-events:none; opacity:.05; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.7'/%3E%3C/svg%3E"); }
+  @media (prefers-reduced-motion:reduce){ .fogv{ animation:none; } }
+
+  /* ---------- identidad ---------- */
+  header.marca{ position:fixed; top:26px; left:30px; z-index:10; max-width:min(52vw, 520px); }
+  header.marca img{ width:clamp(190px, 21vw, 290px); height:auto; display:block; opacity:.95; }
+  header.marca .lede{ margin-top:14px; font-size:17px; line-height:1.5; color:var(--muted); }
+  header.marca .socios{ margin-top:14px; font-size:11px; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--faint); line-height:1.7; }
+
+  /* ---------- cuenta regresiva ---------- */
+  .plazo{ position:fixed; top:26px; right:30px; z-index:62; text-align:right; }
+  .plazo .n{ font-family:var(--display); font-size:34px; line-height:1; color:var(--dorado-hi); }
+  .plazo .l{ font-size:10.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--faint); margin-top:6px; }
+
+  /* ---------- caminos ---------- */
+  main{ position:relative; z-index:10; min-height:100%;
+    display:flex; flex-direction:column; justify-content:flex-end; align-items:center;
+    padding:200px 46px calc(118px + env(safe-area-inset-bottom)); max-width:1180px; margin:0 auto; }
+  nav.caminos{ width:100%; display:grid; grid-template-columns:1fr 1fr; gap:clamp(20px, 5vw, 64px); }
+  .camino{ display:flex; flex-direction:column; gap:6px; text-align:left;
+    padding:20px 22px; border-radius:9px; width:100%;
+    border:1px solid rgba(193,122,74,.38);
+    background:linear-gradient(160deg, rgba(40,25,17,.9), rgba(22,13,8,.9));
+    -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
+    box-shadow:0 10px 30px rgba(0,0,0,.35);
+    color:var(--muted); transition:border-color .25s, transform .25s; }
+  .camino:hover{ transform:translateY(-3px); color:var(--cream); }
+  .cam-tag{ align-self:flex-start; font-size:10.5px; letter-spacing:.2em; text-transform:uppercase;
+    padding:4px 10px; border-radius:20px; border:1px solid; }
+  .camino strong{ font-family:var(--display); font-size:25px; font-weight:600; color:var(--cream); line-height:1.1; }
+  .camino span.desc{ font-size:16px; line-height:1.5; }
+  .camino[data-tono="dorado"] .cam-tag{ color:var(--dorado-hi); border-color:rgba(212,168,67,.5); }
+  .camino[data-tono="dorado"]:hover{ border-color:var(--dorado); }
+  .camino[data-tono="terra"] .cam-tag{ color:var(--terra-hi); border-color:rgba(193,122,74,.55); }
+  .camino[data-tono="terra"]:hover{ border-color:var(--terra); }
+
+  /* ---------- logos ---------- */
+  .logos{ position:fixed; right:26px; bottom:20px; z-index:62; display:flex; align-items:center; gap:26px; }
+  .logos img{ height:36px; width:auto; display:block; opacity:.75; transition:opacity .25s; }
+  .logos a:hover img{ opacity:1; }
+
+  /* ---------- panel (reglas / formulario) ---------- */
+  .panel{ position:fixed; inset:0; z-index:80; display:none;
+    background:rgba(8,5,2,.82); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+    overflow-y:auto; padding:40px 20px 80px; }
+  .panel.abierto{ display:block; }
+  .panel .hoja{ max-width:720px; margin:0 auto; background:var(--panel);
+    border:1px solid var(--line); border-radius:12px; padding:34px 36px 40px; }
+  .panel h2{ font-family:var(--display); font-size:32px; font-weight:600; line-height:1.1; margin-bottom:6px; }
+  .panel .sub{ color:var(--faint); font-size:13px; letter-spacing:.14em; text-transform:uppercase; margin-bottom:24px; }
+  .panel h3{ font-family:var(--display); font-size:21px; font-weight:600; margin:26px 0 6px; }
+  .panel p{ color:var(--muted); margin-bottom:10px; }
+  .panel ul{ color:var(--muted); margin:0 0 10px 20px; }
+  .panel li{ margin-bottom:5px; }
+  .cerrar{ position:sticky; top:0; float:right; font-size:24px; line-height:1; color:var(--faint); padding:4px 8px; }
+  .cerrar:hover{ color:var(--cream); }
+  .borrador{ border:1px dashed var(--line); border-radius:8px; padding:12px 14px;
+    color:var(--faint); font-size:14px; margin-bottom:18px; }
+
+  /* ---------- formulario ---------- */
+  .campo{ margin-bottom:16px; }
+  .campo label{ display:block; font-size:11px; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--faint); margin-bottom:6px; }
+  .campo input, .campo textarea, .campo select{
+    width:100%; padding:11px 12px; background:var(--bg); color:var(--cream);
+    border:1px solid var(--line); border-radius:6px; font-family:var(--body); font-size:16px; }
+  .campo textarea{ min-height:120px; resize:vertical; }
+  .dos{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .check{ display:flex; gap:10px; align-items:flex-start; margin-bottom:10px; color:var(--muted); font-size:15px; }
+  .check input{ margin-top:5px; flex:none; }
+  .zona{ border:1px dashed var(--line); border-radius:8px; padding:20px; text-align:center;
+    color:var(--faint); cursor:pointer; transition:border-color .2s, color .2s; }
+  .zona:hover, .zona.sobre{ border-color:var(--terra); color:var(--muted); }
+  .lista{ margin-top:12px; font-size:14px; }
+  .lista div{ display:flex; justify-content:space-between; gap:12px; padding:7px 0;
+    border-bottom:1px solid var(--line-soft); color:var(--muted); }
+  .lista .peso{ color:var(--faint); flex:none; }
+  .enviar{ margin-top:22px; width:100%; padding:14px; border-radius:8px;
+    background:var(--terra); color:#15100A; font-size:17px; font-weight:600;
+    font-family:var(--display); letter-spacing:.02em; }
+  .enviar:disabled{ opacity:.5; cursor:default; }
+  .barra{ height:6px; background:var(--line-soft); border-radius:3px; margin-top:14px; overflow:hidden; display:none; }
+  .barra div{ height:100%; width:0; background:var(--dorado); transition:width .25s; }
+  .aviso{ margin-top:14px; font-size:14.5px; }
+  .aviso.mal{ color:#D97A6A; } .aviso.ok{ color:#9FBF7A; }
+  .error{ color:#D97A6A; font-size:13.5px; margin-top:5px; }
+
+  @media (max-width:860px){
+    header.marca{ top:18px; left:20px; max-width:64vw; }
+    header.marca .lede{ font-size:15px; }
+    .plazo{ top:18px; right:18px; } .plazo .n{ font-size:26px; }
+    main{ padding:210px 18px calc(84px + env(safe-area-inset-bottom)); }
+    nav.caminos{ grid-template-columns:1fr; gap:12px; max-width:460px; }
+    .camino strong{ font-size:21px; }
+    .dos{ grid-template-columns:1fr; }
+    .panel .hoja{ padding:26px 22px 32px; }
+    .logos{ right:16px; bottom:14px; gap:20px; }
+    .logos img{ height:26px; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="tucuCv" aria-hidden="true"></canvas>
+<div class="velo abajo"></div>
+<div class="velo arriba"></div>
+<div class="stage-msg" id="stageMsg">despertando a Tucu</div>
+
+<div class="fogv a"></div>
+<div class="fogv b"></div>
+<canvas id="embers"></canvas>
+<div id="petro"></div>
+<div class="grain"></div>
+
+<header class="marca">
+  <img src="logo-travesias.png" alt="Travesías">
+  <p class="lede">Convocatoria de fotograf&iacute;a y video.</p>
+  <p class="socios">Universidad de los Andes &middot; Antropolog&iacute;a<br>&times; Estudio La Selva</p>
+</header>
+
+<div class="plazo">
+  <div class="n" id="plazoN">—</div>
+  <div class="l" id="plazoL">cierre 29 de enero</div>
+</div>
+
+<main>
+  <nav class="caminos">
+    <button class="camino" data-tono="dorado" onclick="abrir('formulario')">
+      <span class="cam-tag">Inscripci&oacute;n</span>
+      <strong>Env&iacute;a tu propuesta</strong>
+      <span class="desc">Tus datos y tus archivos, en un solo paso.</span>
+    </button>
+    <button class="camino" data-tono="terra" onclick="abrir('reglas')">
+      <span class="cam-tag">Bases</span>
+      <strong>Reglas del concurso</strong>
+      <span class="desc">Qui&eacute;n puede participar, qu&eacute; se env&iacute;a y c&oacute;mo se elige.</span>
+    </button>
+  </nav>
+</main>
+
+<div class="logos" aria-label="Aliados">
+  <a href="https://www.uniandes.edu.co/es/la-universidad" target="_blank" rel="noopener">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/4/47/University_of_Los_Andes_logo.svg"
+         alt="Universidad de los Andes" style="filter:invert(1) hue-rotate(180deg)">
+  </a>
+  <a href="https://www.estudiolaselva.com/" target="_blank" rel="noopener">
+    <img src="https://images.squarespace-cdn.com/content/67a29672e45a656b8be53344/e752eb5c-38f0-486d-b74b-7c8f05d643c3/Icon.png?content-type=image%2Fpng"
+         alt="Estudio La Selva">
+  </a>
+</div>
+
+<!-- ================= REGLAS (placeholder) ================= -->
+<div class="panel" id="panel-reglas" role="dialog" aria-modal="true" aria-label="Reglas del concurso">
+  <div class="hoja">
+    <button class="cerrar" onclick="cerrar()" aria-label="Cerrar">&times;</button>
+    <h2>Reglas del concurso</h2>
+    <p class="sub">Versi&oacute;n preliminar</p>
+
+    <div class="borrador">Texto de ejemplo. El reglamento definitivo lo redactan Uniandes y
+      Estudio La Selva; cuando llegue se reemplaza esta secci&oacute;n completa.</div>
+
+    <h3>Qui&eacute;n puede participar</h3>
+    <p>[Pendiente: perfil de los participantes, v&iacute;nculo con el programa de becas,
+      restricciones de edad o regi&oacute;n si las hay.]</p>
+
+    <h3>Qu&eacute; se env&iacute;a</h3>
+    <p>[Pendiente: n&uacute;mero m&aacute;ximo de fotos y videos por propuesta, y si se admite
+      m&aacute;s de una propuesta por persona.]</p>
+
+    <h3>Requisitos t&eacute;cnicos</h3>
+    <ul>
+      <li>Fotograf&iacute;a: horizontal, 16:9 o 3:2, m&iacute;nimo 3000 px en el lado largo. JPG o PNG.</li>
+      <li>Video: horizontal 16:9, m&iacute;nimo Full HD, recomendado 4K. MP4 o MOV, H.264 o H.265.</li>
+      <li>Archivos originales, sin recomprimir. Sin marcas de agua, textos ni logos incrustados.</li>
+      <li>Sin capturas de pantalla ni archivos reducidos por aplicaciones de mensajer&iacute;a.</li>
+    </ul>
+
+    <h3>Plazo</h3>
+    <p>El env&iacute;o cierra el <strong>29 de enero de 2027</strong> a las 23:59, hora de Colombia.</p>
+
+    <h3>Uso del material</h3>
+    <p>[Pendiente: cesi&oacute;n de derechos, consentimiento de las personas retratadas y
+      pol&iacute;tica de tratamiento de datos de la Universidad.]</p>
+
+    <h3>Selecci&oacute;n</h3>
+    <p>[Pendiente: criterios, jurado, fechas de resultados y premios.]</p>
+  </div>
+</div>
+
+<!-- ================= FORMULARIO ================= -->
+<div class="panel" id="panel-formulario" role="dialog" aria-modal="true" aria-label="Envía tu propuesta">
+  <div class="hoja">
+    <button class="cerrar" onclick="cerrar()" aria-label="Cerrar">&times;</button>
+    <h2>Env&iacute;a tu propuesta</h2>
+    <p class="sub">Cierra el 29 de enero de 2027</p>
+
+    <div class="borrador" id="avisoBorrador">Modo borrador: el backend a&uacute;n no est&aacute;
+      conectado, as&iacute; que nada se env&iacute;a todav&iacute;a. Los campos son provisionales.</div>
+
+    <form id="form" novalidate>
+      <div class="dos">
+        <div class="campo"><label for="nombre">Nombre</label><input type="text" id="nombre" autocomplete="given-name"></div>
+        <div class="campo"><label for="apellido">Apellido</label><input type="text" id="apellido" autocomplete="family-name"></div>
+      </div>
+      <div class="dos">
+        <div class="campo"><label for="correo">Correo</label><input type="email" id="correo" autocomplete="email"></div>
+        <div class="campo"><label for="telefono">Tel&eacute;fono</label><input type="tel" id="telefono" autocomplete="tel"></div>
+      </div>
+      <div class="dos">
+        <div class="campo"><label for="region">Regi&oacute;n</label>
+          <select id="region">
+            <option value="">Elegir…</option>
+            <option>Amazon&iacute;a</option><option>Andina</option><option>Caribe</option>
+            <option>Orinoqu&iacute;a</option><option>Pac&iacute;fico</option><option>Insular</option>
+          </select></div>
+        <div class="campo"><label for="municipio">Municipio</label><input type="text" id="municipio"></div>
+      </div>
+      <div class="campo"><label for="vinculo">V&iacute;nculo con el programa</label>
+        <input type="text" id="vinculo" placeholder="[Pendiente: becario, egresado, docente…]"></div>
+      <div class="campo"><label for="titulo">T&iacute;tulo de la propuesta</label><input type="text" id="titulo"></div>
+      <div class="campo"><label for="descripcion">Descripci&oacute;n</label>
+        <textarea id="descripcion" placeholder="Qu&eacute; se ve, d&oacute;nde fue, por qu&eacute; importa."></textarea></div>
+
+      <div class="campo">
+        <label>Archivos</label>
+        <div class="zona" id="zona">Arrastra aqu&iacute; tus fotos y videos, o haz clic para elegirlos
+          <input type="file" id="archivos" multiple accept="image/jpeg,image/png,video/mp4,video/quicktime" hidden>
+        </div>
+        <div class="lista" id="lista"></div>
+      </div>
+
+      <div class="check"><input type="checkbox" id="ok1">
+        <label for="ok1" style="text-transform:none;letter-spacing:0;font-size:15px;color:var(--muted)">
+          [Pendiente] Declaro que el material es de mi autor&iacute;a.</label></div>
+      <div class="check"><input type="checkbox" id="ok2">
+        <label for="ok2" style="text-transform:none;letter-spacing:0;font-size:15px;color:var(--muted)">
+          [Pendiente] Cuento con el consentimiento de las personas que aparecen.</label></div>
+      <div class="check"><input type="checkbox" id="ok3">
+        <label for="ok3" style="text-transform:none;letter-spacing:0;font-size:15px;color:var(--muted)">
+          [Pendiente] Autorizo el tratamiento de mis datos y el uso del material.</label></div>
+
+      <button type="submit" class="enviar" id="enviar">Enviar propuesta</button>
+      <div class="barra" id="barra"><div></div></div>
+      <div class="aviso" id="aviso"></div>
+    </form>
+  </div>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+
+<script>
+/* ================================================================
+   CONFIGURACIÓN
+   ================================================================ */
+
+/* URL del Apps Script (/exec). Vacía = modo borrador: el formulario
+   valida y muestra todo, pero no envía nada. */
+const BACKEND = '';
+
+/* cierre: 29 de enero de 2027, 23:59 hora de Colombia (UTC-5) */
+const CIERRE = new Date('2027-01-29T23:59:00-05:00');
+
+const TUCU_URL = 'https://cauchoyselva.github.io/wauro-assets/models/SK_Tucu.glb';
+const MIRA_X = 1, MIRA_Y = 1;
+
+const ENCUADRE = {
+  apaisado: { dist:5.2, bajaOjo:0.3, bajaMira:0.4, desplX:0.0 },
+  vertical: { dist:9.0, bajaOjo:0.6, bajaMira:1.2, desplX:0.0 }
+};
+
+const reducedMotion = matchMedia('(prefers-reduced-motion:reduce)').matches;
+let modeloListo = false;
+
+/* ---------- cuenta regresiva ---------- */
+(function plazo(){
+  const n = document.getElementById('plazoN'), l = document.getElementById('plazoL');
+  function tick(){
+    const dias = Math.ceil((CIERRE - Date.now()) / 86400000);
+    if (dias > 1){ n.textContent = dias; l.textContent = 'días para enviar'; }
+    else if (dias === 1){ n.textContent = '1'; l.textContent = 'último día'; }
+    else { n.textContent = 'Cerrada'; l.textContent = 'convocatoria'; n.style.fontSize = '22px'; }
+  }
+  tick(); setInterval(tick, 60000);
+})();
+
+/* ---------- paneles ---------- */
+function abrir(cual){
+  document.getElementById('panel-' + cual).classList.add('abierto');
+  document.body.style.overflow = 'hidden';
+}
+function cerrar(){
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('abierto'));
+  document.body.style.overflow = '';
+}
+addEventListener('keydown', (e) => { if (e.key === 'Escape') cerrar(); });
+document.querySelectorAll('.panel').forEach(p => {
+  p.addEventListener('click', (e) => { if (e.target === p) cerrar(); });
+});
+if (BACKEND) document.getElementById('avisoBorrador').style.display = 'none';
+
+/* ---------- selección de archivos ---------- */
+const seleccion = [];
+const zona = document.getElementById('zona');
+const input = document.getElementById('archivos');
+zona.addEventListener('click', () => input.click());
+zona.addEventListener('dragover', (e) => { e.preventDefault(); zona.classList.add('sobre'); });
+zona.addEventListener('dragleave', () => zona.classList.remove('sobre'));
+zona.addEventListener('drop', (e) => {
+  e.preventDefault(); zona.classList.remove('sobre');
+  agregar(e.dataTransfer.files);
+});
+input.addEventListener('change', () => agregar(input.files));
+
+function agregar(fl){
+  for (const f of fl){
+    if (!seleccion.some(x => x.name === f.name && x.size === f.size)) seleccion.push(f);
+  }
+  pintarLista();
+}
+function pintarLista(){
+  const l = document.getElementById('lista');
+  l.innerHTML = '';
+  seleccion.forEach((f, i) => {
+    const d = document.createElement('div');
+    const n = document.createElement('span'); n.textContent = f.name;
+    const p = document.createElement('span'); p.className = 'peso';
+    p.textContent = (f.size/1048576).toFixed(1) + ' MB';
+    d.append(n, p); l.appendChild(d);
+  });
+}
+
+/* ---------- envío ----------
+   El flujo definitivo tiene tres tiempos: inscribir (datos → carpeta y
+   radicado), pedir una sesión por archivo, y subir cada archivo directo
+   a Drive. Queda escrito para enchufar el backend cuando la prueba de
+   subida confirme el camino. */
+document.getElementById('form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const aviso = document.getElementById('aviso');
+  aviso.className = 'aviso'; aviso.textContent = '';
+  document.querySelectorAll('.error').forEach(x => x.remove());
+
+  const datos = {
+    nombre: val('nombre'), apellido: val('apellido'), correo: val('correo'),
+    telefono: val('telefono'), region: val('region'), municipio: val('municipio'),
+    vinculo: val('vinculo'), titulo: val('titulo'), descripcion: val('descripcion')
+  };
+
+  const faltan = [];
+  if (!datos.nombre)   faltan.push('nombre');
+  if (!datos.apellido) faltan.push('apellido');
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(datos.correo)) faltan.push('correo');
+  if (!datos.region)   faltan.push('region');
+  if (!datos.titulo)   faltan.push('titulo');
+  if (!seleccion.length) faltan.push('archivos');
+  if (!document.getElementById('ok1').checked ||
+      !document.getElementById('ok2').checked ||
+      !document.getElementById('ok3').checked) faltan.push('autorizaciones');
+
+  if (faltan.length){
+    faltan.forEach(id => {
+      const c = document.getElementById(id);
+      if (!c) return;
+      const m = document.createElement('div');
+      m.className = 'error'; m.textContent = 'Falta completar este campo';
+      c.parentElement.appendChild(m);
+    });
+    aviso.className = 'aviso mal';
+    aviso.textContent = faltan.includes('archivos')
+      ? 'Agrega al menos un archivo y completa los campos marcados.'
+      : (faltan.includes('autorizaciones')
+          ? 'Hay que aceptar las tres autorizaciones.'
+          : 'Revisa los campos marcados.');
+    return;
+  }
+
+  if (!BACKEND){
+    aviso.className = 'aviso ok';
+    aviso.textContent = 'Todo validado. En modo borrador no se envía nada: ' +
+      seleccion.length + ' archivo(s), ' +
+      (seleccion.reduce((s,f) => s+f.size, 0)/1048576).toFixed(1) + ' MB en total.';
+    return;
+  }
+
+  const boton = document.getElementById('enviar');
+  const barra = document.getElementById('barra');
+  const relleno = barra.firstElementChild;
+  boton.disabled = true; barra.style.display = 'block';
+
+  try {
+    const ins = await pedir({ accion:'inscribir', datos, origen: location.origin,
+      archivos: seleccion.map(f => ({ nombre:f.name, tipo:f.type, tamano:f.size })) });
+    if (!ins.ok) throw new Error(ins.error || 'no se pudo registrar');
+
+    const total = seleccion.reduce((s,f) => s+f.size, 0);
+    let subido = 0;
+
+    for (let i = 0; i < seleccion.length; i++){
+      const f = seleccion[i];
+      const s = await pedir({ accion:'sesion', radicado: ins.radicado, indice: i,
+        nombre: f.name, tipo: f.type, tamano: f.size, origen: location.origin });
+      if (!s.ok) throw new Error(s.error || 'no se pudo abrir la subida de ' + f.name);
+      await subir(s.url, f, (cargado) => {
+        relleno.style.width = (100*(subido + cargado)/total).toFixed(1) + '%';
+      });
+      subido += f.size;
+    }
+
+    await pedir({ accion:'cerrar', radicado: ins.radicado });
+    aviso.className = 'aviso ok';
+    aviso.textContent = 'Propuesta recibida. Tu radicado es ' + ins.radicado +
+      '. Te llega una confirmación al correo.';
+  } catch (err){
+    aviso.className = 'aviso mal';
+    aviso.textContent = 'No se pudo completar el envío: ' + err.message +
+      ' — vuelve a intentarlo, o escríbenos si sigue fallando.';
+    boton.disabled = false;
+  }
+});
+
+function val(id){ return document.getElementById(id).value.trim(); }
+
+/* text/plain a propósito: evita el preflight que Apps Script no responde */
+async function pedir(cuerpo){
+  const r = await fetch(BACKEND, {
+    method:'POST',
+    headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+    body: JSON.stringify(cuerpo)
+  });
+  return r.json();
+}
+
+function subir(url, f, onProgreso){
+  return new Promise((resolve, reject) => {
+    const x = new XMLHttpRequest();
+    x.open('PUT', url, true);
+    x.setRequestHeader('Content-Type', f.type || 'application/octet-stream');
+    x.upload.onprogress = (e) => { if (e.lengthComputable) onProgreso(e.loaded); };
+    x.onload = () => (x.status === 200 || x.status === 201)
+      ? resolve() : reject(new Error('Drive respondió ' + x.status));
+    x.onerror = () => reject(new Error('se interrumpió la conexión'));
+    x.send(f);
+  });
+}
+
+/* ---------- brasas ---------- */
+(function initEmbers(){
+  const cv = document.getElementById('embers'), ctx = cv.getContext('2d'), P = [];
+  function size(){ cv.width = innerWidth; cv.height = innerHeight; }
+  size(); addEventListener('resize', size);
+  const COUNT = reducedMotion ? 0 : (innerWidth < 700 ? 18 : 40);
+  for (let i=0;i<COUNT;i++) P.push({ x:Math.random()*innerWidth, y:Math.random()*innerHeight,
+    r:0.7+Math.random()*1.8, s:0.1+Math.random()*0.34, drift:(Math.random()-0.5)*0.17,
+    ph:Math.random()*Math.PI*2, gold:Math.random()<0.35 });
+  if (COUNT>0)(function tick(t){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    for (const p of P){
+      p.y -= p.s; p.x += p.drift + Math.sin(t*0.0005 + p.ph)*0.12;
+      if (p.y < -8){ p.y = cv.height + 8; p.x = Math.random()*cv.width; }
+      const a = 0.22 + 0.26*Math.abs(Math.sin(t*0.001 + p.ph));
+      ctx.beginPath();
+      ctx.fillStyle = p.gold ? 'rgba(220,176,80,'+a+')' : 'rgba(200,126,76,'+a+')';
+      ctx.shadowBlur = 5;
+      ctx.shadowColor = p.gold ? 'rgba(212,168,67,0.6)' : 'rgba(193,122,74,0.5)';
+      ctx.arc(p.x, p.y, p.r, 0, 7); ctx.fill();
+    }
+    ctx.shadowBlur = 0; requestAnimationFrame(tick);
+  })(0);
+})();
+
+/* ---------- petroglifos bajo el cursor ---------- */
+(function initPetroCursor(){
+  const petro = document.getElementById('petro');
+  if (reducedMotion || !matchMedia('(pointer:fine)').matches) return;
+  const R = 150;
+  let mtx=-3000, mty=-3000, mpx=-3000, mpy=-3000, intensity=0, lx=null, ly=null;
+  addEventListener('mousemove', (e) => {
+    mtx=e.clientX; mty=e.clientY;
+    if (lx!==null) intensity = Math.min(1, intensity + Math.hypot(e.clientX-lx, e.clientY-ly)*0.011);
+    lx=e.clientX; ly=e.clientY;
+  });
+  (function ptick(){
+    mpx += (mtx-mpx)*0.15; mpy += (mty-mpy)*0.15; intensity *= 0.955;
+    const m = 'radial-gradient(circle '+R+'px at '+mpx.toFixed(0)+'px '+mpy.toFixed(0)+'px, #000 0%, #000 28%, transparent 72%)';
+    petro.style.webkitMaskImage = m; petro.style.maskImage = m;
+    petro.style.opacity = (0.24*intensity).toFixed(3);
+    requestAnimationFrame(ptick);
+  })();
+})();
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const cv = document.getElementById('tucuCv'), msg = document.getElementById('stageMsg');
+const reduced = matchMedia('(prefers-reduced-motion:reduce)').matches;
+const finePointer = matchMedia('(pointer:fine)').matches;
+
+const renderer = new THREE.WebGLRenderer({ canvas:cv, antialias:true, alpha:true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(34, 1, 0.05, 60);
+scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
+
+const key = new THREE.DirectionalLight(0xffe2bc, 1.2); key.position.set(2.5, 3, 2); scene.add(key);
+const rim = new THREE.PointLight(0xD4A843, 0.5, 12); rim.position.set(-2.5, 1.2, -2); scene.add(rim);
+
+let encuadrar = null;
+function size(){
+  renderer.setSize(innerWidth, innerHeight, false);
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  if (encuadrar) encuadrar();
+}
+size(); addEventListener('resize', size);
+
+/* los GLB del repo llevan geometria Draco (extension REQUERIDA):
+   sin este decodificador la carga falla en seco */
+const loader = new GLTFLoader();
+const draco = new DRACOLoader();
+draco.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/libs/draco/');
+loader.setDRACOLoader(draco);
+let mixer = null, bones = null;
+const headScreen = { x: innerWidth/2, y: innerHeight*0.3 };
+
+loader.load(TUCU_URL, (gltf) => {
+  const model = gltf.scene; scene.add(model);
+  const busca = (n) => model.getObjectByName('mixamorig'+n) || model.getObjectByName('mixamorig:'+n);
+  bones = { head: busca('Head'), neck: busca('Neck'), spine: busca('Spine2') };
+  const headTop = busca('HeadTop_End');
+
+  /* encuadre anclado a la CABEZA: en mallas skinned el bounding box
+     mide la geometria en espacio de bind y la camara acaba mirando un pie */
+  model.updateWorldMatrix(true, true);
+  const pHead = new THREE.Vector3(), pTop = new THREE.Vector3();
+  if (bones.head){
+    bones.head.getWorldPosition(pHead);
+    (headTop || bones.head).getWorldPosition(pTop);
+    const u = headTop ? Math.max(pTop.distanceTo(pHead), 0.02) : 0.25;
+    encuadrar = () => {
+      const e = (innerWidth / innerHeight >= 1) ? ENCUADRE.apaisado : ENCUADRE.vertical;
+      const x = pHead.x - u * e.desplX;
+      camera.position.set(x, pHead.y - u * e.bajaOjo, pHead.z + u * e.dist);
+      camera.lookAt(x, pHead.y - u * e.bajaMira, pHead.z);
+      camera.updateMatrixWorld();
+      const v = pHead.clone().project(camera);
+      headScreen.x = (v.x + 1) / 2 * innerWidth;
+      headScreen.y = (1 - v.y) / 2 * innerHeight;
+    };
+    encuadrar();
+  }
+
+  if (!reduced){
+    const idle = gltf.animations.find(a => /idle/i.test(a.name)) || gltf.animations[0];
+    if (idle){ mixer = new THREE.AnimationMixer(model); mixer.clipAction(idle).play(); }
+  }
+  modeloListo = true; msg.classList.add('gone');
+}, (ev) => {
+  if (ev.total) msg.textContent = 'despertando a Tucu · ' + Math.round(100*ev.loaded/ev.total) + '%';
+}, (err) => {
+  console.error('[tucu]', err);
+  modeloListo = true;
+  msg.textContent = 'Tucu no despertó — la convocatoria funciona igual';
+});
+
+let tX=0, tY=0, gX=0, gY=0;
+const MAX_YAW = 0.55, MAX_PITCH = 0.32;
+function apuntar(px, py){
+  tX = Math.max(-1, Math.min(1, (px - headScreen.x) / (innerWidth * 0.5)));
+  tY = Math.max(-1, Math.min(1, (py - headScreen.y) / (innerHeight * 0.5)));
+}
+if (finePointer){
+  addEventListener('mousemove', (e) => apuntar(e.clientX, e.clientY));
+} else {
+  let next = 0;
+  setInterval(() => {
+    if (performance.now() > next){
+      tX = (Math.random()*2-1)*0.7; tY = (Math.random()*2-1)*0.35;
+      next = performance.now() + 1800 + Math.random()*2600;
+    }
+  }, 400);
+  addEventListener('touchstart', (e) => { const t = e.touches[0]; if (t) apuntar(t.clientX, t.clientY); }, { passive:true });
+}
+
+const clock = new THREE.Clock(), _e = new THREE.Euler(), _q = new THREE.Quaternion();
+function mirar(b, w){
+  if (!b) return;
+  _e.set(MIRA_Y*gY*MAX_PITCH*w, MIRA_X*gX*MAX_YAW*w, 0);
+  _q.setFromEuler(_e); b.quaternion.multiply(_q);
+}
+(function loop(){
+  requestAnimationFrame(loop);
+  const dt = clock.getDelta();
+  if (mixer) mixer.update(dt);
+  if (bones && !reduced){
+    gX += (tX-gX)*0.08; gY += (tY-gY)*0.08;
+    mirar(bones.spine, 0.15); mirar(bones.neck, 0.30); mirar(bones.head, 0.55);
+  }
+  renderer.render(scene, camera);
+})();
+</script>
+</body>
+</html>
