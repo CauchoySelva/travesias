@@ -348,7 +348,7 @@ function fichaTexto(radicado, d, plan) {
    sin tildes, sin eñes, sin espacios */
 function slugNombre(apellido, nombre) {
   var s = txt(apellido) + '-' + txt(nombre);
-  return s.normalize('NFD').replace(/[̀-ͯ]/g, '')
+  return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
           .replace(/ñ/gi, 'n')
           .replace(/[^A-Za-z0-9]+/g, '-')
           .replace(/^-+|-+$/g, '')
