@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prueba de subida · Travesías</title>
+<style>
+  body{ font-family:system-ui, sans-serif; max-width:720px; margin:40px auto; padding:0 20px;
+        background:#15100A; color:#E8DCC8; line-height:1.55; }
+  h1{ font-size:22px; margin-bottom:4px; }
+  p.sub{ color:#B8A890; margin-bottom:26px; font-size:15px; }
+  label{ display:block; margin:16px 0 6px; font-size:13px; letter-spacing:.08em;
+         text-transform:uppercase; color:#8A7A64; }
+  input[type=text]{ width:100%; padding:10px; background:#0D0804; color:#E8DCC8;
+                    border:1px solid #4A3528; border-radius:6px; font-size:14px; }
+  button{ margin-top:22px; padding:12px 22px; background:#C17A4A; color:#15100A;
+          border:0; border-radius:6px; font-size:15px; font-weight:600; cursor:pointer; }
+  button:disabled{ opacity:.5; cursor:default; }
+  #barra{ height:8px; background:#33241A; border-radius:4px; margin-top:20px; overflow:hidden; display:none; }
+  #barra div{ height:100%; width:0; background:#D4A843; transition:width .2s; }
+  #log{ margin-top:22px; padding:14px; background:#0D0804; border:1px solid #33241A;
+        border-radius:6px; font-family:ui-monospace, monospace; font-size:12.5px;
+        white-space:pre-wrap; min-height:60px; }
+  .ok{ color:#8FBF6A; } .mal{ color:#D97A6A; } .info{ color:#8A7A64; }
+</style>
+</head>
+<body>
+
+<h1>Prueba de subida directa a Drive</h1>
+<p class="sub">Verifica dos cosas de un solo golpe: que Apps Script pueda crear la sesión
+con el origen correcto, y que el navegador pueda subir los bytes sin que lo frene CORS.
+Usa un video de verdad, de los pesados — con una foto pequeña la prueba no prueba nada.</p>
+
+<label for="url">URL del Apps Script (termina en /exec)</label>
+<input type="text" id="url" placeholder="https://script.google.com/macros/s/AKfy.../exec">
+
+<label for="archivo">Archivo</label>
+<input type="file" id="archivo">
+
+<button id="ir">Subir</button>
+
+<div id="barra"><div></div></div>
+<div id="log">Esperando…</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const log = (txt, clase) => {
+  const l = $('log');
+  l.innerHTML += (l.innerHTML === 'Esperando…' ? (l.innerHTML = '', '') : '\n') +
+    (clase ? '<span class="' + clase + '">' + txt + '</span>' : txt);
+};
+
+$('ir').addEventListener('click', async () => {
+  const url = $('url').value.trim();
+  const f = $('archivo').files[0];
+  if (!url || !f) { log('Falta la URL o el archivo.', 'mal'); return; }
+
+  $('ir').disabled = true;
+  $('log').innerHTML = '';
+  log('Archivo: ' + f.name + '  ·  ' + (f.size/1048576).toFixed(1) + ' MB  ·  ' + (f.type || 'sin tipo'), 'info');
+  log('Origen de esta página: ' + location.origin, 'info');
+
+  /* ---- PASO 1 · pedir la sesión al Apps Script ----------------
+     text/plain a propósito: evita el preflight que Apps Script no
+     responde. El cuerpo sigue siendo JSON.                        */
+  let sesion;
+  try {
+    log('\n[1/2] Pidiendo sesión de subida…');
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        accion: 'sesion',
+        nombre: f.name,
+        tipo:   f.type || 'application/octet-stream',
+        tamano: f.size,
+        origen: location.origin
+      })
+    });
+    sesion = await r.json();
+    if (!sesion.ok) {
+      log('FALLA en el paso 1: ' + sesion.error, 'mal');
+      if (sesion.detalle) log(sesion.detalle, 'info');
+      if (sesion.encabezados) log('encabezados vistos: ' + sesion.encabezados, 'info');
+      $('ir').disabled = false; return;
+    }
+    log('Sesión creada.', 'ok');
+  } catch (err) {
+    log('FALLA en el paso 1 (red/CORS contra Apps Script): ' + err, 'mal');
+    log('Revisa que la implementación sea "Cualquier persona".', 'info');
+    $('ir').disabled = false; return;
+  }
+
+  /* ---- PASO 2 · subir los bytes directo a Google --------------
+     Si esto pasa, la arquitectura entera queda confirmada: sin
+     límite de tamaño y sin cuenta de Google.                      */
+  log('\n[2/2] Subiendo directo a Drive…');
+  $('barra').style.display = 'block';
+  const barra = $('barra').firstElementChild;
+
+  const t0 = performance.now();
+  const xhr = new XMLHttpRequest();
+  xhr.open('PUT', sesion.url, true);
+  xhr.setRequestHeader('Content-Type', f.type || 'application/octet-stream');
+
+  xhr.upload.onprogress = (e) => {
+    if (e.lengthComputable) barra.style.width = (100*e.loaded/e.total).toFixed(1) + '%';
+  };
+  xhr.onload = () => {
+    const seg = ((performance.now()-t0)/1000).toFixed(1);
+    if (xhr.status === 200 || xhr.status === 201) {
+      const d = JSON.parse(xhr.responseText || '{}');
+      log('SUBIDA COMPLETA en ' + seg + ' s — id ' + (d.id || '?'), 'ok');
+      log('\nLa arquitectura funciona: subida directa, sin cuenta de Google, sin techo de tamaño.', 'ok');
+    } else {
+      log('Drive respondió ' + xhr.status, 'mal');
+      log((xhr.responseText || '').slice(0, 400), 'info');
+    }
+    $('ir').disabled = false;
+  };
+  xhr.onerror = () => {
+    log('FALLA en el paso 2: el navegador bloqueó el PUT (CORS).', 'mal');
+    log('Significa que el Origin declarado al crear la sesión no coincide con ' + location.origin, 'info');
+    log('Plan B: trocear por el script, o campo de enlace externo para video.', 'info');
+    $('ir').disabled = false;
+  };
+  xhr.send(f);
+});
+</script>
+</body>
+</html>
