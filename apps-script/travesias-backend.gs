@@ -130,7 +130,6 @@ function inscribir(p) {
   if (!txt(d.nombre))   falta.push('nombre');
   if (!txt(d.apellido)) falta.push('apellido');
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(txt(d.correo))) falta.push('correo');
-  if (!txt(d.region))   falta.push('región');
   if (!txt(d.titulo))   falta.push('título');
   if (falta.length) return { ok: false, error: 'faltan datos: ' + falta.join(', ') };
 
@@ -181,7 +180,6 @@ function inscribir(p) {
       radicado,
       new Date(),
       txt(d.nombre), txt(d.apellido), txt(d.correo), txt(d.telefono),
-      txt(d.region), txt(d.municipio), txt(d.vinculo),
       txt(d.titulo), txt(d.descripcion),
       plan.filter(esFoto).map(nuevoNombre).join('\n'),
       plan.filter(esVideo).map(nuevoNombre).join('\n'),
@@ -214,7 +212,7 @@ function sesion(p) {
   if (p.radicado) {
     var fila = buscarFila(p.radicado);
     if (!fila) return { ok: false, error: 'radicado no encontrado' };
-    var t = JSON.parse(fila.hoja.getRange(fila.n, 18).getValue());
+    var t = JSON.parse(fila.hoja.getRange(fila.n, 15).getValue());   // columna O: tecnico
     var item = t.plan[p.indice];
     if (!item) return { ok: false, error: 'índice de archivo fuera de rango' };
     if (item.original !== p.nombre)
@@ -264,20 +262,20 @@ function cerrar(p) {
   var fila = buscarFila(p.radicado);
   if (!fila) return { ok: false, error: 'radicado no encontrado' };
 
-  fila.hoja.getRange(fila.n, 17).setValue('completa');
+  fila.hoja.getRange(fila.n, 14).setValue('completa');   // columna N: estado
 
   if (ENVIAR_CONFIRMACION) {
     try {
-      var v = fila.hoja.getRange(fila.n, 1, 1, 16).getValues()[0];
+      var v = fila.hoja.getRange(fila.n, 1, 1, 13).getValues()[0];
       MailApp.sendEmail({
         to: v[4],
         replyTo: RESPONDER_A,
         subject: 'Travesías — propuesta recibida (' + v[0] + ')',
         body: 'Hola ' + v[2] + ',\n\n' +
-              'Recibimos tu propuesta "' + v[9] + '".\n' +
+              'Recibimos tu propuesta "' + v[6] + '".\n' +
               'Tu número de radicado es ' + v[0] + '; guárdalo para cualquier consulta.\n\n' +
               'Archivos recibidos:\n' +
-              [v[11], v[12]].filter(String).join('\n') + '\n\n' +
+              [v[8], v[9]].filter(String).join('\n') + '\n\n' +
               'Te escribiremos con los resultados.\n\n' +
               'Travesías — Universidad de los Andes × Estudio La Selva'
       });
@@ -325,8 +323,6 @@ function fichaTexto(radicado, d, plan) {
     'Participante: ' + txt(d.nombre) + ' ' + txt(d.apellido),
     'Correo: ' + txt(d.correo),
     'Teléfono: ' + txt(d.telefono),
-    'Región: ' + txt(d.region) + (txt(d.municipio) ? ' — ' + txt(d.municipio) : ''),
-    'Vínculo: ' + txt(d.vinculo),
     '',
     'Título: ' + txt(d.titulo),
     '',

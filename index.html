@@ -130,10 +130,15 @@
   .zona{ border:1px dashed var(--line); border-radius:8px; padding:20px; text-align:center;
     color:var(--faint); cursor:pointer; transition:border-color .2s, color .2s; }
   .zona:hover, .zona.sobre{ border-color:var(--terra); color:var(--muted); }
+  .pista{ margin-top:8px; font-size:13.5px; color:var(--faint); }
   .lista{ margin-top:12px; font-size:14px; }
-  .lista div{ display:flex; justify-content:space-between; gap:12px; padding:7px 0;
+  .lista div{ display:flex; align-items:center; gap:12px; padding:7px 0;
     border-bottom:1px solid var(--line-soft); color:var(--muted); }
+  .lista .nom{ flex:1; word-break:break-all; }
   .lista .peso{ color:var(--faint); flex:none; }
+  .lista .quitar{ flex:none; color:var(--faint); font-size:18px; line-height:1; padding:0 4px; }
+  .lista .quitar:hover{ color:var(--terra-hi); }
+  .lista .total{ color:var(--faint); border-bottom:0; padding-top:10px; }
   .enviar{ margin-top:22px; width:100%; padding:14px; border-radius:8px;
     background:var(--terra); color:#15100A; font-size:17px; font-weight:600;
     font-family:var(--display); letter-spacing:.02em; }
@@ -265,17 +270,6 @@
         <div class="campo"><label for="correo">Correo</label><input type="email" id="correo" autocomplete="email"></div>
         <div class="campo"><label for="telefono">Tel&eacute;fono</label><input type="tel" id="telefono" autocomplete="tel"></div>
       </div>
-      <div class="dos">
-        <div class="campo"><label for="region">Regi&oacute;n</label>
-          <select id="region">
-            <option value="">Elegir…</option>
-            <option>Amazon&iacute;a</option><option>Andina</option><option>Caribe</option>
-            <option>Orinoqu&iacute;a</option><option>Pac&iacute;fico</option><option>Insular</option>
-          </select></div>
-        <div class="campo"><label for="municipio">Municipio</label><input type="text" id="municipio"></div>
-      </div>
-      <div class="campo"><label for="vinculo">V&iacute;nculo con el programa</label>
-        <input type="text" id="vinculo" placeholder="[Pendiente: becario, egresado, docente…]"></div>
       <div class="campo"><label for="titulo">T&iacute;tulo de la propuesta</label><input type="text" id="titulo"></div>
       <div class="campo"><label for="descripcion">Descripci&oacute;n</label>
         <textarea id="descripcion" placeholder="Qu&eacute; se ve, d&oacute;nde fue, por qu&eacute; importa."></textarea></div>
@@ -285,6 +279,7 @@
         <div class="zona" id="zona">Arrastra aqu&iacute; tus fotos y videos, o haz clic para elegirlos
           <input type="file" id="archivos" multiple accept="image/jpeg,image/png,video/mp4,video/quicktime" hidden>
         </div>
+        <p class="pista">Puedes agregarlos de a uno o en varias tandas, mezclando fotos y videos.</p>
         <div class="lista" id="lista"></div>
       </div>
 
@@ -386,11 +381,22 @@ function pintarLista(){
   l.innerHTML = '';
   seleccion.forEach((f, i) => {
     const d = document.createElement('div');
-    const n = document.createElement('span'); n.textContent = f.name;
+    const n = document.createElement('span'); n.className = 'nom'; n.textContent = f.name;
     const p = document.createElement('span'); p.className = 'peso';
     p.textContent = (f.size/1048576).toFixed(1) + ' MB';
-    d.append(n, p); l.appendChild(d);
+    const q = document.createElement('button');
+    q.type = 'button'; q.className = 'quitar'; q.textContent = '\u00d7';
+    q.setAttribute('aria-label', 'Quitar ' + f.name);
+    q.addEventListener('click', () => { seleccion.splice(i, 1); pintarLista(); });
+    d.append(n, p, q); l.appendChild(d);
   });
+  if (seleccion.length){
+    const t = document.createElement('div');
+    t.className = 'total';
+    t.textContent = seleccion.length + ' archivo(s) · ' +
+      (seleccion.reduce((a,f) => a+f.size, 0)/1048576).toFixed(1) + ' MB en total';
+    l.appendChild(t);
+  }
 }
 
 /* ---------- envío ----------
@@ -406,15 +412,13 @@ document.getElementById('form').addEventListener('submit', async (e) => {
 
   const datos = {
     nombre: val('nombre'), apellido: val('apellido'), correo: val('correo'),
-    telefono: val('telefono'), region: val('region'), municipio: val('municipio'),
-    vinculo: val('vinculo'), titulo: val('titulo'), descripcion: val('descripcion')
+    telefono: val('telefono'), titulo: val('titulo'), descripcion: val('descripcion')
   };
 
   const faltan = [];
   if (!datos.nombre)   faltan.push('nombre');
   if (!datos.apellido) faltan.push('apellido');
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(datos.correo)) faltan.push('correo');
-  if (!datos.region)   faltan.push('region');
   if (!datos.titulo)   faltan.push('titulo');
   if (!seleccion.length) faltan.push('archivos');
   if (!document.getElementById('ok1').checked ||
