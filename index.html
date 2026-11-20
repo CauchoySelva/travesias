@@ -446,21 +446,30 @@ document.getElementById('form').addEventListener('submit', async (e) => {
     return;
   }
 
+  /* INSTANTÁNEA de la selección. Antes el código leía `seleccion` dos
+     veces —al registrar y al subir— y en móvil el selector puede
+     entregar un video pesado despuecito del primer toque: el backend
+     planificaba N archivos y el bucle intentaba subir N+1. A partir de
+     aquí nadie mira `seleccion`, solo `lote`. */
+  const lote = seleccion.slice();
+
   const boton = document.getElementById('enviar');
   const barra = document.getElementById('barra');
   const relleno = barra.firstElementChild;
   boton.disabled = true; barra.style.display = 'block';
+  zona.style.pointerEvents = 'none';
+  zona.style.opacity = '.5';
 
   try {
     const ins = await pedir({ accion:'inscribir', datos, origen: location.origin,
-      archivos: seleccion.map(f => ({ nombre:f.name, tipo:f.type, tamano:f.size })) });
+      archivos: lote.map(f => ({ nombre:f.name, tipo:f.type, tamano:f.size })) });
     if (!ins.ok) throw new Error(ins.error || 'no se pudo registrar');
 
-    const total = seleccion.reduce((s,f) => s+f.size, 0);
+    const total = lote.reduce((s,f) => s+f.size, 0);
     let subido = 0;
 
-    for (let i = 0; i < seleccion.length; i++){
-      const f = seleccion[i];
+    for (let i = 0; i < lote.length; i++){
+      const f = lote[i];
       const s = await pedir({ accion:'sesion', radicado: ins.radicado, indice: i,
         nombre: f.name, tipo: f.type, tamano: f.size, origen: location.origin });
       if (!s.ok) throw new Error(s.error || 'no se pudo abrir la subida de ' + f.name);
@@ -479,6 +488,8 @@ document.getElementById('form').addEventListener('submit', async (e) => {
     aviso.textContent = 'No se pudo completar el envío: ' + err.message +
       ' — vuelve a intentarlo, o escríbenos si sigue fallando.';
     boton.disabled = false;
+    zona.style.pointerEvents = '';
+    zona.style.opacity = '';
   }
 });
 
