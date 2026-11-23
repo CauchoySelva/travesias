@@ -282,18 +282,23 @@ function cerrar(p) {
   if (ENVIAR_CONFIRMACION) {
     try {
       var v = fila.hoja.getRange(fila.n, 1, 1, 13).getValues()[0];
-      var lista = [v[8], v[9]].filter(String).join('\n').split('\n').filter(String);
+      /* los nombres TAL COMO LLEGARON. El nombre interno de archivo no
+         le dice nada al participante y solo lo confunde. */
+      var lista = txt(v[10]).split('\n').filter(String).map(function (x) {
+        return txt(x.split('→')[0]);
+      });
       MailApp.sendEmail({
         to: v[4],
         replyTo: RESPONDER_A,
         name: 'Travesías',
         subject: 'Travesías — recibimos tu propuesta (' + v[0] + ')',
         body: 'Hola ' + v[2] + ',\n\n' +
-              'Recibimos tu propuesta "' + v[6] + '". Queda registrada con el\n' +
-              'número de radicado ' + v[0] + ' — guárdalo, es tu comprobante de\n' +
-              'entrega y el que usaremos para cualquier consulta.\n\n' +
-              'Archivos recibidos (' + lista.length + '):\n' +
+              'Recibimos tu propuesta "' + v[6] + '", con ' + lista.length +
+              (lista.length === 1 ? ' archivo:' : ' archivos:') + '\n\n' +
               lista.map(function (x) { return '  · ' + x; }).join('\n') + '\n\n' +
+              'Queda registrada con el número de radicado ' + v[0] + '. Guárdalo:\n' +
+              'es tu comprobante de entrega y el que usaremos para cualquier\n' +
+              'consulta sobre tu participación.\n\n' +
               'Si algo de esto no coincide con lo que enviaste, respóndenos a\n' +
               'este correo citando tu radicado.\n\n' +
               'Te escribiremos cuando haya resultados.\n\n' +
