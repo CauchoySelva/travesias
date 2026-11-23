@@ -59,9 +59,9 @@ var HOJA             = 'Inscripciones';
 /* Cierre: 29 de enero de 2027, 23:59 hora de Colombia (UTC-5) */
 var CIERRE = new Date('2027-01-29T23:59:00-05:00');
 
-/* Límites. PENDIENTES DE DEFINIR con Uniandes — estos son provisionales
-   y el formulario de la página no los conoce todavía. */
-var MAX_ARCHIVOS      = 20;
+/* Tope por CONCURSANTE, no por envío: tres archivos en total entre
+   fotos y videos, sumando lo que haya entregado antes. */
+var MAX_ARCHIVOS      = 3;
 var MAX_BYTES_ARCHIVO = 5 * 1024 * 1024 * 1024;    //  5 GB por archivo
 var MAX_BYTES_TOTAL   = 20 * 1024 * 1024 * 1024;   // 20 GB por propuesta
 
@@ -136,8 +136,9 @@ function inscribir(p) {
 
   /* el cliente ya validó, pero el cliente no es de fiar */
   var archivos = p.archivos || [];
-  if (!archivos.length)              return { ok: false, error: 'no hay archivos' };
-  if (archivos.length > MAX_ARCHIVOS) return { ok: false, error: 'máximo ' + MAX_ARCHIVOS + ' archivos' };
+  if (!archivos.length) return { ok: false, error: 'no hay archivos' };
+  if (archivos.length > MAX_ARCHIVOS)
+    return { ok: false, error: 'máximo ' + MAX_ARCHIVOS + ' archivos entre fotos y videos' };
 
   var total = 0;
   for (var i = 0; i < archivos.length; i++) {
@@ -157,6 +158,19 @@ function inscribir(p) {
   lock.waitLock(30000);
   try {
     var hoja = SpreadsheetApp.openById(SHEET_ID).getSheetByName(HOJA);
+
+    /* el tope es por persona, así que hay que mirar lo ya entregado.
+       Solo cuentan las entregas completas: a quien se le cayó la
+       conexión no se le descuenta lo que no llegó. */
+    var previo = loEntregado(hoja, d.correo);
+    if (previo.archivos >= MAX_ARCHIVOS)
+      return { ok: false, error: 'ya entregaste los ' + MAX_ARCHIVOS +
+        ' archivos permitidos (' + previo.radicados.join(', ') + ')' };
+    if (previo.archivos + archivos.length > MAX_ARCHIVOS)
+      return { ok: false, error: 'ya tienes ' + previo.archivos + ' archivo(s) entregados en ' +
+        previo.radicados.join(', ') + '. El máximo por concursante es ' + MAX_ARCHIVOS +
+        ' en total, así que puedes enviar ' + (MAX_ARCHIVOS - previo.archivos) + ' más' };
+
     var radicado = 'TRV-' + pad(hoja.getLastRow(), 4);   // fila 1 = encabezado
     var slug = slugNombre(d.apellido, d.nombre);
 
@@ -298,6 +312,23 @@ function cerrar(p) {
 /* ===============================================================
    AUXILIARES
    =============================================================== */
+
+/* cuántos archivos lleva entregados un correo, y en qué radicados */
+function loEntregado(hoja, correo) {
+  var c = txt(correo).toLowerCase();
+  var ult = hoja.getLastRow();
+  var r = { archivos: 0, radicados: [] };
+  if (ult < 2) return r;
+  var v = hoja.getRange(2, 1, ult - 1, 14).getValues();   // A..N
+  for (var i = 0; i < v.length; i++) {
+    if (txt(v[i][4]).toLowerCase() !== c) continue;       // E: correo
+    if (txt(v[i][13]) !== 'completa') continue;           // N: estado
+    r.archivos += txt(v[i][8]).split('\n').filter(String).length +   // I: fotos
+                  txt(v[i][9]).split('\n').filter(String).length;    // J: videos
+    r.radicados.push(v[i][0]);
+  }
+  return r;
+}
 
 function buscarFila(radicado) {
   var hoja = SpreadsheetApp.openById(SHEET_ID).getSheetByName(HOJA);

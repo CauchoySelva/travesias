@@ -294,9 +294,9 @@
       video de Apple</a>. Es para inspirar y orientar, no para limitar su creatividad.</p>
 
     <h3>Qu&eacute; se env&iacute;a</h3>
-    <p>Cada concursante puede enviar un m&aacute;ximo de <strong>tres propuestas</strong>, entre
-      fotograf&iacute;as y videos, cargándolas en la secci&oacute;n <em>Env&iacute;a tu propuesta</em> de
-      esta p&aacute;gina.</p>
+    <p>Cada concursante puede enviar un m&aacute;ximo de <strong>tres archivos en total</strong>,
+      entre fotograf&iacute;as y videos, carg&aacute;ndolos en la secci&oacute;n <em>Env&iacute;a tu propuesta</em>
+      de esta p&aacute;gina.</p>
 
     <h3>Requisitos t&eacute;cnicos &middot; fotograf&iacute;a</h3>
     <ul>
@@ -378,7 +378,8 @@
         <div class="zona" id="zona">Arrastra aqu&iacute; tus fotos y videos, o haz clic para elegirlos
           <input type="file" id="archivos" multiple accept="image/jpeg,image/png,video/mp4,video/quicktime" hidden>
         </div>
-        <p class="pista">Puedes agregarlos de a uno o en varias tandas, mezclando fotos y videos.</p>
+        <p class="pista">M&aacute;ximo 3 archivos en total, entre fotos y videos.
+          Puedes agregarlos de a uno o en varias tandas.</p>
         <div class="lista" id="lista"></div>
       </div>
 
@@ -437,6 +438,10 @@ const BACKEND = 'https://script.google.com/macros/s/AKfycbz_7MYhRovlpVG1TCVS3MQG
 
 /* cierre: 29 de enero de 2027, 23:59 hora de Colombia (UTC-5) */
 const CIERRE = new Date('2027-01-29T23:59:00-05:00');
+
+/* tope por concursante: 3 archivos en total entre fotos y videos.
+   El backend lo revalida sumando entregas anteriores del mismo correo. */
+const MAX_ARCHIVOS = 3;
 
 const TUCU_URL = 'https://cauchoyselva.github.io/wauro-assets/models/SK_Tucu.glb';
 const MIRA_X = 1, MIRA_Y = 1;
@@ -511,10 +516,21 @@ zona.addEventListener('drop', (e) => {
 input.addEventListener('change', () => agregar(input.files));
 
 function agregar(fl){
+  let sobran = 0;
   for (const f of fl){
-    if (!seleccion.some(x => x.name === f.name && x.size === f.size)) seleccion.push(f);
+    if (seleccion.some(x => x.name === f.name && x.size === f.size)) continue;
+    if (seleccion.length >= MAX_ARCHIVOS){ sobran++; continue; }
+    seleccion.push(f);
   }
   pintarLista();
+  const aviso = document.getElementById('aviso');
+  if (sobran){
+    aviso.className = 'aviso mal';
+    aviso.textContent = 'El máximo es ' + MAX_ARCHIVOS + ' archivos entre fotos y videos. ' +
+      'Quita alguno de la lista si quieres cambiarlo.';
+  } else if (aviso.textContent.startsWith('El máximo es')){
+    aviso.textContent = '';
+  }
 }
 function pintarLista(){
   const l = document.getElementById('lista');
