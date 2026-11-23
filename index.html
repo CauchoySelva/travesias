@@ -133,6 +133,23 @@
     color:var(--faint); cursor:pointer; transition:border-color .2s, color .2s; }
   .zona:hover, .zona.sobre{ border-color:var(--terra); color:var(--muted); }
   .pista{ margin-top:8px; font-size:13.5px; color:var(--faint); }
+  .requisitos{
+    margin-bottom:12px; padding:14px 16px; border-radius:8px;
+    border:1px solid var(--line-soft); background:rgba(13,8,4,.45);
+  }
+  .requisitos .tope{ margin:0 0 12px; color:var(--cream); font-size:15px; }
+  .requisitos .tope strong{ color:var(--dorado-hi); }
+  .req-cols{ display:grid; grid-template-columns:1fr 1fr; gap:14px 24px; }
+  .req-cols h4{
+    font-size:10.5px; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--terra-hi); font-weight:400; margin-bottom:6px;
+  }
+  .req-cols ul{ margin:0 0 0 16px; padding:0; }
+  .req-cols li{ color:var(--muted); font-size:14px; line-height:1.45; margin-bottom:3px; }
+  .requisitos .orig{ margin:12px 0 0; color:var(--faint); font-size:13.5px; }
+  .enlace{ color:var(--terra-hi); text-decoration:underline; font-size:13.5px; padding:0; }
+  .enlace:hover{ color:var(--dorado-hi); }
+  @media (max-width:640px){ .req-cols{ grid-template-columns:1fr; } }
   .lista{ margin-top:12px; font-size:14px; }
   .lista div{ display:flex; align-items:center; gap:12px; padding:7px 0;
     border-bottom:1px solid var(--line-soft); color:var(--muted); }
@@ -375,11 +392,38 @@
 
       <div class="campo">
         <label>Archivos</label>
+
+        <div class="requisitos">
+          <p class="tope">M&aacute;ximo <strong>3 archivos en total</strong>, entre fotograf&iacute;as
+            y videos. Puedes mandar los tres de un tipo, o combinarlos.</p>
+          <div class="req-cols">
+            <div>
+              <h4>Fotograf&iacute;a</h4>
+              <ul>
+                <li>JPG, JPEG o PNG</li>
+                <li>Horizontal, 16:9 o 3:2</li>
+                <li>M&iacute;nimo 3000 px en el lado largo</li>
+              </ul>
+            </div>
+            <div>
+              <h4>Video</h4>
+              <ul>
+                <li>MP4 o MOV, c&oacute;dec H.264 o H.265</li>
+                <li>Horizontal 16:9, m&iacute;nimo Full HD</li>
+                <li>Entre 30 segundos y 2 minutos</li>
+                <li>Sin m&uacute;sica, narraci&oacute;n ni efectos de sonido</li>
+              </ul>
+            </div>
+          </div>
+          <p class="orig">Env&iacute;a los archivos originales, en su m&aacute;xima calidad y sin
+            recomprimir. Sin marcas de agua, textos ni logotipos.
+            <button type="button" class="enlace" onclick="verReglas()">Ver todas las reglas</button></p>
+        </div>
+
         <div class="zona" id="zona">Arrastra aqu&iacute; tus fotos y videos, o haz clic para elegirlos
           <input type="file" id="archivos" multiple accept="image/jpeg,image/png,video/mp4,video/quicktime" hidden>
         </div>
-        <p class="pista">M&aacute;ximo 3 archivos en total, entre fotos y videos.
-          Puedes agregarlos de a uno o en varias tandas.</p>
+        <p class="pista">Puedes agregarlos de a uno o en varias tandas.</p>
         <div class="lista" id="lista"></div>
       </div>
 
@@ -479,6 +523,15 @@ function cerrar(){
   if (subiendo) return;
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('abierto'));
   document.body.style.overflow = '';
+}
+
+/* del formulario al reglamento y de vuelta: ocultar el panel no borra
+   lo que el participante ya escribió ni los archivos que eligió */
+function verReglas(){
+  document.getElementById('panel-formulario').classList.remove('abierto');
+  const r = document.getElementById('panel-reglas');
+  r.classList.add('abierto');
+  r.scrollTop = 0;
 }
 
 /* al cerrar la confirmación, el formulario vuelve a su estado inicial */
