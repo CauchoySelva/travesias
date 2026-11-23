@@ -116,7 +116,7 @@
   .cerrar{ position:sticky; top:0; float:right; font-size:24px; line-height:1; color:var(--faint); padding:4px 8px; }
   .cerrar:hover{ color:var(--cream); }
   .borrador{ border:1px dashed var(--line); border-radius:8px; padding:12px 14px;
-    color:var(--faint); font-size:14px; margin-bottom:18px; }
+    color:var(--faint); font-size:14px; margin:18px 0; }
 
   /* ---------- formulario ---------- */
   .campo{ margin-bottom:16px; }
@@ -129,15 +129,17 @@
   .dos{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
   .check{ display:flex; gap:10px; align-items:flex-start; margin-bottom:10px; color:var(--muted); font-size:15px; }
   .check input{ margin-top:5px; flex:none; }
-  .zona{ border:1px dashed var(--line); border-radius:8px; padding:20px; text-align:center;
-    color:var(--faint); cursor:pointer; transition:border-color .2s, color .2s; }
+  .check label{ text-transform:none; letter-spacing:0; font-size:15px;
+    color:var(--muted); line-height:1.5; margin:0; }
+  .zona{
+    border:1px dashed var(--line); border-radius:6px; padding:26px 20px; text-align:center;
+    background:var(--bg); color:var(--faint); cursor:pointer;
+    transition:border-color .2s, color .2s;
+  }
   .zona:hover, .zona.sobre{ border-color:var(--terra); color:var(--muted); }
   .pista{ margin-top:8px; font-size:13.5px; color:var(--faint); }
-  .requisitos{
-    margin-bottom:12px; padding:14px 16px; border-radius:8px;
-    border:1px solid var(--line-soft); background:rgba(13,8,4,.45);
-  }
-  .requisitos .tope{ margin:0 0 12px; color:var(--cream); font-size:15px; }
+  .requisitos{ margin-top:14px; }
+  .requisitos .tope{ margin:0 0 12px; color:var(--muted); font-size:14.5px; }
   .requisitos .tope strong{ color:var(--dorado-hi); }
   .req-cols{ display:grid; grid-template-columns:1fr 1fr; gap:14px 24px; }
   .req-cols h4{
@@ -393,6 +395,10 @@
       <div class="campo">
         <label>Archivos</label>
 
+        <div class="zona" id="zona">Arrastra aqu&iacute; tus fotos y videos, o haz clic para elegirlos
+          <input type="file" id="archivos" multiple accept="image/jpeg,image/png,video/mp4,video/quicktime" hidden>
+        </div>
+        <p class="pista">Puedes agregarlos de a uno o en varias tandas.</p>
         <div class="requisitos">
           <p class="tope">M&aacute;ximo <strong>3 archivos en total</strong>, entre fotograf&iacute;as
             y videos. Puedes mandar los tres de un tipo, o combinarlos.</p>
@@ -419,23 +425,17 @@
             recomprimir. Sin marcas de agua, textos ni logotipos.
             <button type="button" class="enlace" onclick="verReglas()">Ver todas las reglas</button></p>
         </div>
-
-        <div class="zona" id="zona">Arrastra aqu&iacute; tus fotos y videos, o haz clic para elegirlos
-          <input type="file" id="archivos" multiple accept="image/jpeg,image/png,video/mp4,video/quicktime" hidden>
-        </div>
-        <p class="pista">Puedes agregarlos de a uno o en varias tandas.</p>
         <div class="lista" id="lista"></div>
       </div>
 
+      <p class="borrador">Redacci&oacute;n provisional: el texto definitivo de esta
+        autorizaci&oacute;n lo entrega la Universidad antes de abrir la convocatoria.</p>
+
       <div class="check"><input type="checkbox" id="ok1">
-        <label for="ok1" style="text-transform:none;letter-spacing:0;font-size:15px;color:var(--muted)">
-          [Pendiente] Declaro que el material es de mi autor&iacute;a.</label></div>
-      <div class="check"><input type="checkbox" id="ok2">
-        <label for="ok2" style="text-transform:none;letter-spacing:0;font-size:15px;color:var(--muted)">
-          [Pendiente] Cuento con el consentimiento de las personas que aparecen.</label></div>
-      <div class="check"><input type="checkbox" id="ok3">
-        <label for="ok3" style="text-transform:none;letter-spacing:0;font-size:15px;color:var(--muted)">
-          [Pendiente] Autorizo el tratamiento de mis datos y el uso del material.</label></div>
+        <label for="ok1">Declaro que el material es de mi autor&iacute;a, que cuento con el
+          consentimiento de las personas que aparecen en &eacute;l, y autorizo el tratamiento
+          de mis datos y el uso del material en los t&eacute;rminos de
+          <button type="button" class="enlace" onclick="verReglas()">las reglas del concurso</button>.</label></div>
 
       <button type="submit" class="enviar" id="enviar">Enviar propuesta</button>
       <div class="barra" id="barra"><div></div></div>
@@ -630,9 +630,7 @@ document.getElementById('form').addEventListener('submit', async (e) => {
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(datos.correo)) faltan.push('correo');
   if (!datos.titulo)   faltan.push('titulo');
   if (!seleccion.length) faltan.push('archivos');
-  if (!document.getElementById('ok1').checked ||
-      !document.getElementById('ok2').checked ||
-      !document.getElementById('ok3').checked) faltan.push('autorizaciones');
+  if (!document.getElementById('ok1').checked) faltan.push('autorizaciones');
 
   if (faltan.length){
     faltan.forEach(id => {
@@ -646,7 +644,7 @@ document.getElementById('form').addEventListener('submit', async (e) => {
     aviso.textContent = faltan.includes('archivos')
       ? 'Agrega al menos un archivo y completa los campos marcados.'
       : (faltan.includes('autorizaciones')
-          ? 'Hay que aceptar las tres autorizaciones.'
+          ? 'Hay que aceptar la declaración para poder enviar.'
           : 'Revisa los campos marcados.');
     return;
   }
